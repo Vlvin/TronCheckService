@@ -1,27 +1,18 @@
+from datetime import datetime
 from pydantic import BaseModel
+
+from checker._types import AccountData_DTO
 
 
 class GetAddressOutput(BaseModel):
-    address: str
-    bandwidth: float
-    energy: float
-    trx: int
+    time: datetime
+    account_data: AccountData_DTO
 
 
 class GetAddressInput(BaseModel):
     address: str
 
 
-class Data_DTO(BaseModel):
-    address: str
-    bandwidth: float
-    energy: float
-    trx: int
-
-
 class GetLastDataOutput(BaseModel):
     page: int
-    data: list[Data_DTO]
-
-    # class Config:
-    #     frozen = True
+    data: list[AccountData_DTO]

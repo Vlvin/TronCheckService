@@ -1,7 +1,12 @@
+import datetime
 import uvicorn
-from mytypes import Data_DTO, GetAddressInput, GetAddressOutput, GetLastDataOutput
+from database.main import add_to_database, get_from_database
+from database.types import AccountData  # noqa: F401
+from mytypes import GetAddressInput, GetAddressOutput, GetLastDataOutput
 
 from fastapi import FastAPI
+
+from checker import get_address_data, AccountData_DTO
 
 ELEMENTS_PER_PAGE = 10
 
@@ -11,28 +16,25 @@ def main():
 
     @app.post("/check_address")  # info for address
     async def check_address(input: GetAddressInput) -> GetAddressOutput:
-        result: GetAddressOutput = GetAddressOutput.model_validate(
-            {"address": "0.0", "bandwidth": 0.0, "energy": 0.0, "trx": 0.0}
-        )
+        query_time: datetime = datetime.datetime.now()
+        account_data: AccountData_DTO = get_address_data(input.address)
+        add_to_database(query_time, account_data)
+        result = GetAddressOutput(time=query_time, account_data=account_data)
         return result
 
     @app.get("/get_last")
     async def get_last_data(page: int) -> GetLastDataOutput:
         # render some html
-        result = GetLastDataOutput.model_validate(
-            {
-                "page": page,
-                "data": [
-                    Data_DTO.model_validate(
-                        {"address": f"{x}", "bandwidth": x, "energy": x, "trx": x}
-                    )
-                    for x in range(
-                        page * ELEMENTS_PER_PAGE,
-                        page * ELEMENTS_PER_PAGE + ELEMENTS_PER_PAGE,
-                    )
-                ],
-            }
-        )
+        data: list[AccountData_DTO] = [
+            AccountData_DTO(
+                address=model.address,
+                bandwidth=model.bandwidth,
+                energy=model.energy,
+                trx=model.trx,
+            )
+            for model in get_from_database(page)
+        ]
+        result = GetLastDataOutput(page=page, data=data)
         return result
 
     uvicorn.run(app)

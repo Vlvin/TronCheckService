@@ -1,13 +1,20 @@
 from datetime import datetime
 
 import dotenv
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 from database.types import AccountData
 from mytypes import AccountData_DTO
 
 from . import engine
 
 MAX_PER_PAGE = int(dotenv.get_key("config.env", "MAX_PER_PAGE"))
+
+
+def get_records_count():
+    with Session(engine) as session:
+        stmt = select(AccountData)
+        records = session.exec(stmt).all()
+        return len(records)
 
 
 def add_to_database(request_time: datetime, account_data: AccountData_DTO):
@@ -25,14 +32,14 @@ def add_to_database(request_time: datetime, account_data: AccountData_DTO):
 
 def get_from_database(page: int) -> list[AccountData]:
     with Session(engine) as session:
-        pages = session.query(AccountData).count() // MAX_PER_PAGE
+        pages = get_records_count() // MAX_PER_PAGE
         page = min(max(page - 1, 0), pages)
-        skip = page * MAX_PER_PAGE
+        offset = page * MAX_PER_PAGE
 
-        return (
-            session.query(AccountData)
+        stmt = (
+            select(AccountData)
             .order_by(AccountData.request_datetime)
-            .offset(skip)
+            .offset(offset)
             .limit(MAX_PER_PAGE)
-            .all()
         )
+        return session.exec(stmt).all()

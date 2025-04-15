@@ -14,5 +14,6 @@ class GetAddressInput(BaseModel):
 
 
 class GetLastDataOutput(BaseModel):
+    pages: int
     page: int
     data: list[AccountData_DTO]

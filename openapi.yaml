@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+    title: Tron Balance Service
+    version: 1.0.0
+    description: Get resources balances from Tron Net
+
+servers:
+    - url: http://localhost:8000
+
+paths:
+  /check_address:
+    post:
+      summary: Get balance and put request to database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAddressInput'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAddressOutput'
+
+  /get_page:
+    get:
+      summary: Get last data from database
+      parameters:
+        - name: page
+          in: query
+          description: content page
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLastDataOutput'
+
+        500:
+          description: Page is out of range ()
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+    GetAddressInput:
+      type: object
+      properties:
+        address:
+          type: string
+    GetAddressOutput:
+      type: object
+      properties:
+        time:
+          type: string
+        account_data:
+          type: object
+    GetLastDataOutput:
+      type: object
+      properties:
+        pages:
+          type: int
+        page:
+          type: int
+        data:
+          type: array
+    AccountData_DTO:
+      type: object
+      properties:
+        address:
+          type: string
+        bandwidth:
+          type: int
+        energy:
+          type: int
+        trx:
+          type: string
+   
+

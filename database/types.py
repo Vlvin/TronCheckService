@@ -1,12 +1,10 @@
-from datetime import datetime
-from decimal import Decimal
-from sqlmodel import SQLModel, Field
+from dataclasses import dataclass
+
+from checker._types import AccountData_DTO
 
 
-class AccountData(SQLModel, table=True):
-    id: int = Field(primary_key=True)
-    request_datetime: datetime = Field(nullable=False)
-    address: str
-    bandwidth: int
-    energy: int
-    trx: Decimal
+@dataclass
+class GetFromDatabaseOutput:
+    pages: int
+    page: int
+    data: list[AccountData_DTO]

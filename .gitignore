@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 
+# dots
+./.python-version
+
 # Secrets
 **/.env

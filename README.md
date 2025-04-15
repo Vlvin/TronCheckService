@@ -45,6 +45,11 @@ pytest
 uv pytest
 ```
 
+- docker compose
+```sh
+docker compose up
+```
+
 # Usage
 After succesfull run, server will be available at http://localhost:8000 by default  
 You can find it's endpoints specification at openapi.yaml

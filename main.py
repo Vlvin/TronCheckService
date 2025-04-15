@@ -1,5 +1,7 @@
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 import datetime
+from alembic.config import Config, command
 import uvicorn
 
 from database import add_to_database, get_from_database
@@ -10,6 +12,19 @@ from fastapi import FastAPI, Response
 from checker import get_address_data, AccountData_DTO
 
 ELEMENTS_PER_PAGE = 10
+
+
+def run_migrations():
+    print("start migration")
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")
+    print("finish migration")
+
+
+@asynccontextmanager
+async def lifespan(app_: FastAPI):
+    run_migrations()
+    yield
 
 
 @dataclass
@@ -48,13 +63,13 @@ async def get_data_from_page(
 
 
 def main():
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
 
     app.post("/check_address")(check_address)  # info for address
 
     app.get("/get_page")(get_data_from_page)
 
-    uvicorn.run(app)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,29 @@
+services:
+  db:
+    image: mariadb
+    container_name: tron_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: tron_balance
+      MYSQL_USER: tron
+      MYSQL_PASSWORD: 12345
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+  tron-service:
+    build:
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./docker.env:/app/.env
+    ports:
+      - "8000:8000"
+    command: ["python", "main.py"]
+    restart: always
+volumes:
+  db-data:

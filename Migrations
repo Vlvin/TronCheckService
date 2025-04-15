@@ -1,0 +1,12 @@
+FROM python:latest
+
+COPY ./requirements.txt ./requirements.txt
+
+RUN pip install -r requirements.txt
+
+COPY ./migrations ./migrations
+COPY ./alembic.ini ./alembic.ini
+COPY ./.env ./.env
+COPY ./database/models.py ./database/models.py
+
+RUN alembic upgrade head
